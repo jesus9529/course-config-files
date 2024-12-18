@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: jhernandez
       POSTGRES_PASSWORD: jhernandez
-      POSTGRES_DATABASE: posts
+      POSTGRES_DB: posts
     volumes:
       - postgres-volume-data:/var/lib/postgresql/data
     networks:

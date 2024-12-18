@@ -3,6 +3,9 @@
 		{
 			"name": "Segunda",
 			"path": "."
+		},
+		{
+			"path": "../JavaCourse/posts"
 		}
 	],
 	"settings": {
