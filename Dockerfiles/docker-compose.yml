@@ -1,0 +1,36 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: jhernandez
+      POSTGRES_PASSWORD: jhernandez
+      POSTGRES_DATABASE: posts
+    volumes:
+      - postgres-volume-data:/var/lib/postgresql/data
+    networks:
+      - test-network
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 8001:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: jhernandez@example.com
+      PGADMIN_DEFAULT_PASSWORD: P4ssw0rd
+    depends_on:
+      - postgres-db
+    networks:
+      - test-network
+    volumes:
+      - pgadmin-volume-data:/var/lib/pgadmin
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  postgres-volume-data:
+  pgadmin-volume-data:  
