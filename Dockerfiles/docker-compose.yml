@@ -33,4 +33,4 @@ networks:
 
 volumes:
   postgres-volume-data:
-  pgadmin-volume-data:  
+  pgadmin-volume-data:
