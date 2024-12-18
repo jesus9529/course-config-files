@@ -1,0 +1,57 @@
+version: '3.9' # Versión del esquema de Docker Compose
+
+services: # Definición de los servicios que componen la aplicación
+  app: # Nombre del servicio
+    image: node:16 # Imagen de Docker que se usará para este servicio
+    container_name: mi_app_container # Nombre personalizado del contenedor
+    build: # Opcional: Configuración para construir una imagen desde un Dockerfile
+      context: ./app # Directorio donde se encuentra el Dockerfile
+      dockerfile: Dockerfile # Nombre del archivo Dockerfile (por defecto, "Dockerfile")
+    ports: 
+      - "3000:3000" # Mapea el puerto 3000 del contenedor al puerto 3000 del host
+    environment: # Variables de entorno para el contenedor
+      NODE_ENV: development
+    volumes: # Mapea carpetas del host al contenedor
+      - ./app:/usr/src/app # Sincroniza el código fuente con el contenedor
+    depends_on: # Indica que este servicio depende de otros
+      - db
+    restart: always # Reinicia el contenedor automáticamente si falla
+
+  db: # Servicio para la base de datos
+    image: postgres:14 # Imagen de Docker para PostgreSQL
+    container_name: db_container # Nombre personalizado del contenedor
+    ports: 
+      - "5432:5432" # Mapea el puerto 5432 del contenedor al host
+    environment: # Variables de entorno necesarias para la configuración del contenedor
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    volumes: # Persistencia de datos para mantener la base de datos en el host
+      - db_data:/var/lib/postgresql/data
+
+  redis: # Servicio para un caché Redis
+    image: redis:6 # Imagen oficial de Redis
+    container_name: redis_container
+    ports:
+      - "6379:6379" # Mapea el puerto 6379 para Redis
+    command: ["redis-server", "--appendonly", "yes"] # Configuración adicional
+
+volumes: # Definición de volúmenes persistentes
+  db_data: # Volumen para la base de datos PostgreSQL
+    driver: local # Tipo de driver utilizado (por defecto, local)
+
+networks: # Redes para conectar los servicios entre sí
+  default: # Red predeterminada que Docker Compose creará automáticamente
+    driver: bridge # Driver utilizado para la red (por defecto, bridge)
+
+# Explicación:
+# - `version`: Determina la versión del esquema que usa este archivo. Recomendado usar la más reciente compatible con tu entorno.
+# - `services`: Define los contenedores individuales que forman parte de la aplicación.
+# - `image`: Usa una imagen preexistente del repositorio de Docker.
+# - `build`: Si no se especifica `image`, permite construir una imagen personalizada con un Dockerfile.
+# - `ports`: Define cómo los puertos del contenedor se exponen al host.
+# - `environment`: Proporciona variables de entorno para configurar los contenedores.
+# - `volumes`: Permite almacenar datos de forma persistente entre reinicios.
+# - `depends_on`: Asegura que ciertos servicios estén disponibles antes de iniciar otros.
+# - `networks`: Conecta los servicios, habilitando la comunicación directa entre contenedores.
+
