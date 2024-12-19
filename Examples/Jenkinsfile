@@ -1,0 +1,58 @@
+pipeline {
+    agent any // Ejecuta en cualquier agente disponible
+
+    environment {
+        MAVEN_HOME = '/usr/share/maven' // Ruta al directorio de Maven en el agente
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk' // Ruta al directorio de Java 17 en el agente
+        PATH = "${MAVEN_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
+    }
+
+    stages {
+        stage('Checkout') { // Obtención del código fuente
+            steps {
+                echo 'Clonando el repositorio...'
+                checkout scm
+            }
+        }
+
+        stage('Compile') { // Compilación del proyecto
+            steps {
+                echo 'Compilando el proyecto con Java 17...'
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Run Tests') { // Ejecución de pruebas
+            steps {
+                echo 'Ejecutando pruebas...'
+                sh 'mvn test'
+            }
+        }
+
+        stage('Package') { // Empaquetado del proyecto
+            steps {
+                echo 'Empaquetando el proyecto...'
+                sh 'mvn package'
+            }
+        }
+
+        stage('Deploy') { // Simulación de despliegue
+            steps {
+                echo 'Desplegando la aplicación...'
+                sh 'scp target/*.jar user@server:/path/to/deployment/directory'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline terminado, ejecutando limpieza...'
+        }
+        success {
+            echo 'Pipeline ejecutado con éxito 🎉'
+        }
+        failure {
+            echo 'Pipeline falló 😞. Revisa los logs para más detalles.'
+        }
+    }
+}
