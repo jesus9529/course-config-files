@@ -1,0 +1,14 @@
+docker run -d --name springboot-app --network dockerfiles_test-network -p 8080:8080 -e CORS_ALLOWED_ORIGINS='*' -e CORS_ALLOWED_METHODS='*' -e JAVA_OPTS='-Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true' -e SPRING_PROFILES_ACTIVE='dev' -e SPRING_DATASOURCE_URL='jdbc:postgresql://postgres-db:5432/posts' -e SPRING_DATASOURCE_USERNAME='jhernandez' -e SPRING_DATASOURCE_PASSWORD='jhernandez' -e SPRING_JPA_HIBERNATE_DDL_AUTO='update' posts:1.0.0 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+docker run --name springboot-app --network dockerfiles_test-network -p 8080:8080 -e CORS_ALLOWED_ORIGINS='*' -e CORS_ALLOWED_METHODS='*' -e JAVA_OPTS='-Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true' -e SPRING_PROFILES_ACTIVE='dev' -e SPRING_DATASOURCE_URL='jdbc:postgresql://postgres-db:5432/posts' -e SPRING_DATASOURCE_USERNAME='jhernandez' -e SPRING_DATASOURCE_PASSWORD='jhernandez' -e SPRING_JPA_HIBERNATE_DDL_AUTO='update' posts:1.0.0 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+https://dockerlabs.collabnix.com/docker/cheatsheet/
+
+https://github.com/marketplace/actions/build-and-push-docker-images
+
+https://github.com/marketplace/actions/openshift-login
+
+https://hub.docker.com/r/jenkins/jenkins
+
+https://cookbook.openshift.org/image-registry-and-image-streams/how-do-i-push-an-image-to-the-internal-image-registry.html
+
