@@ -1,0 +1,13 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: springboot-app-prod
+  namespace: ${OPENSHIFT_PROJECT_NAME}
+spec:
+  to:
+    kind: Service
+    name: springboot-app-prod
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge

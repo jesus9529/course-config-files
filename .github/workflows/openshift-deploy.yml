@@ -1,0 +1,69 @@
+name: Build and Deploy to OpenShift
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Build Docker Image and Push to OpenShift Registry
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to OpenShift
+      run: |
+        echo "${{ secrets.OPENSHIFT_TOKEN }}" | oc login ${{ secrets.OPENSHIFT_API_URL }} --token=-
+
+    - name: Build Docker Image
+      env:
+        DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
+        OPENSHIFT_PROJECT_NAME: ${{ secrets.OPENSHIFT_PROJECT_NAME }}
+        OPENSHIFT_REGISTRY_URL: ${{ secrets.OPENSHIFT_REGISTRY_URL }}
+      run: |
+        docker build -f Dockerfile.prod -t $OPENSHIFT_REGISTRY_URL/$OPENSHIFT_PROJECT_NAME/$DOCKER_IMAGE_NAME:latest .
+
+    - name: Push Docker Image
+      env:
+        OPENSHIFT_REGISTRY_URL: ${{ secrets.OPENSHIFT_REGISTRY_URL }}
+        OPENSHIFT_PROJECT_NAME: ${{ secrets.OPENSHIFT_PROJECT_NAME }}
+        DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
+      run: |
+        docker login -u $(oc whoami) -p $(oc whoami -t) $OPENSHIFT_REGISTRY_URL
+        docker push $OPENSHIFT_REGISTRY_URL/$OPENSHIFT_PROJECT_NAME/$DOCKER_IMAGE_NAME:latest
+
+  deploy:
+    name: Deploy to OpenShift
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to OpenShift
+      run: |
+        echo "${{ secrets.OPENSHIFT_TOKEN }}" | oc login ${{ secrets.OPENSHIFT_API_URL }} --token=-
+
+    - name: Apply OpenShift Configurations
+      env:
+        CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+        CORS_ALLOWED_METHODS: ${{ secrets.CORS_ALLOWED_METHODS }}
+        SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+        SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+        SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+        SPRING_JPA_HIBERNATE_DDL_AUTO: ${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}
+      run: |
+        oc apply -f openshift-deployment.yml
+        oc apply -f openshift-service.yml
+
+    - name: Trigger Deployment
+      env:
+        OPENSHIFT_DEPLOYMENT_NAME: ${{ secrets.OPENSHIFT_DEPLOYMENT_NAME }}
+      run: |
+        oc rollout latest dc/$OPENSHIFT_DEPLOYMENT_NAME
+        oc rollout status dc/$OPENSHIFT_DEPLOYMENT_NAME
